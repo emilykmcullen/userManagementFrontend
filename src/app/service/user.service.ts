@@ -26,6 +26,10 @@ export class UserService {
     return this.http.post<User>(`${this.host}/user/update`, formData);
   }
 
+  public resetPassword(formData: FormData): Observable<User> {
+    return this.http.post<User>(`${this.host}/user/resetPassword`, formData);
+  }
+
   public updateProfileImage(formData: FormData): Observable<HttpEvent<any> | HttpErrorResponse>{
     return this.http.post<User>(`${this.host}/user/updateProfileImage`, formData, 
     {reportProgress: true,
@@ -54,7 +58,6 @@ export class UserService {
     formData.append('firstName', user.firstName);
     formData.append('lastName', user.lastName);
     formData.append('username', user.username);
-    formData.append('password', user.password);
     formData.append('email', user.email);
     formData.append('profileImage', profileImage);
     formData.append('isActive', JSON.stringify(user.active));

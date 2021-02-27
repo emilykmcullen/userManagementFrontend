@@ -19,7 +19,6 @@ export class User {
       this.firstName = '';
       this.lastName = '';
       this.username = '';
-      this.password = '';
       this.email = '';
       this.lastLoginDate = null;
       this.lastLoginDateDisplay = null;
