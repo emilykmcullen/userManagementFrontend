@@ -12,6 +12,7 @@ export class AuthenticationService {
   private host = environment.apiUrl;
   private token: string;
   private loggedInUsername: string;
+  private jwtHelper = new JwtHelperService();
 
   constructor(private http: HttpClient) { 
     
@@ -57,6 +58,18 @@ export class AuthenticationService {
   }
 
   public isLoggedIn(): boolean{
-    return 
+    this.loadToken();
+    if(this.token != null && this.token !==''){
+      if(this.jwtHelper.decodeToken(this.token).sub != null || ''){
+        if(!this.jwtHelper.isTokenExpired(this.token)){
+          this.loggedInUsername = this.jwtHelper.decodeToken(this.token).sub;
+          return true;
+        }
+      }
+    } 
+    else {
+      this.logOut();
+      return false;
+    }
   }
 }
