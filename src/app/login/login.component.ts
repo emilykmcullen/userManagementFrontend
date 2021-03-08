@@ -2,6 +2,7 @@ import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { HeaderType } from '../enum/header-type.enum';
 import { NotificationType } from '../enum/notification-type.enum';
 import { User } from '../models/user';
 import { AuthenticationService } from '../service/authentication.service';
@@ -37,7 +38,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.authenticationService.login(user).subscribe(
         //if the http request is successful and a user object is returned in the response
         (response: HttpResponse<User>) => {
-          const token = response.headers.get('Jwt-Token');
+          const token = response.headers.get(HeaderType.JWT_TOKEN);
           //saves token in local storage in the browser
           this.authenticationService.saveToken(token);
           this.authenticationService.addUserToLocalCache(response.body);
@@ -52,7 +53,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       )
     );
   }
-  sendErrorNotification(notificationType: NotificationType, message: string) {
+  private sendErrorNotification(notificationType: NotificationType, message: string): void {
     if(message){
       this.notificationService.showNotification(notificationType, message);
     }
