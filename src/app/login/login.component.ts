@@ -58,7 +58,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.notificationService.showNotification(notificationType, message);
     }
     else {
-      this.notificationService.showNotification(notificationType, "AN ERROR OCCURED. PLEASE TRY AGAIN.")
+      this.notificationService.showNotification(notificationType, "An error occured. Please try again.")
     }
   }
 
