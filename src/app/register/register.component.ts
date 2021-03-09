@@ -28,7 +28,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   public onRegister(user: User): void {
     this.showLoading = true;
-    console.log(user);
     this.subscriptions.push(
       this.authenticationService.register(user).subscribe(
         (response: User) => {
@@ -36,7 +35,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
           this.sendNotification(NotificationType.SUCCESS, 'Your account has been created!');
         },
         (errorResponse: HttpErrorResponse) => {
-          console.log(errorResponse);
           this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
           this.showLoading = false;
         }
