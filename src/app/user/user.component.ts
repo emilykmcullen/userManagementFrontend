@@ -1,5 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { Component, OnInit } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import { NotificationType } from '../enum/notification-type.enum';
 import { User } from '../models/user';
@@ -18,6 +20,8 @@ export class UserComponent implements OnInit {
   public refreshing: boolean;
   public selectedUser: User;
   private subscriptions: Subscription[] = [];
+  public fileName: string;
+  profileImage: File;
 
   constructor(private userService: UserService, private notificationService: NotificationService) { }
 
@@ -51,8 +55,36 @@ export class UserComponent implements OnInit {
 
   public onSelectUser(selectedUser: User): void {
     this.selectedUser = selectedUser;
-    document.getElementById('openUserInfo').click();
+    this.clickButton('openUserInfo');
   }
+
+  public onProfileImageChange(fileName: string, profileImage: File): void {
+    this.fileName = fileName;
+    this.profileImage = profileImage;
+  }
+
+  public saveNewUser(): void {
+    this.clickButton('new-user-save');
+  }
+
+  public onAddNewUser(userForm: NgForm): void {
+    const formData = this.userService.createUserFormData(null, userForm.value, this.profileImage);
+    this.subscriptions.push(
+    this.userService.addUser(formData).subscribe(
+      (response: User) => {
+        this.clickButton('new-user-close');
+        this.getUsers(false);
+        this.fileName = null;
+        this.profileImage = null;
+        userForm.reset();
+        this.sendNotification(NotificationType.SUCCESS, `${response.firstName} ${response.lastName} updated successfully`);
+      },
+      (errorResponse: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+      }
+    )
+    );
+  } 
 
   private sendNotification(notificationType: NotificationType, message: string): void {
     if(message){
@@ -61,6 +93,10 @@ export class UserComponent implements OnInit {
     else {
       this.notificationService.showNotification(notificationType, "An error occured. Please try again.")
     }
+  }
+
+  private clickButton(buttonId: string): void {
+    document.getElementById(buttonId).click()
   }
 
 
