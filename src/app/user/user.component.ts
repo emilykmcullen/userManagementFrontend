@@ -86,6 +86,22 @@ export class UserComponent implements OnInit {
     );
   } 
 
+  public searchUsers(searchTerm: string): void {
+    const results: User[] = []; 
+    for (const user of this.userService.getUsersFromLocalCache()) {
+      if (user.firstName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+          user.lastName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+          user.username.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+          user.userId.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+            results.push(user)
+      }
+    }
+    this.users= results;
+    if (results.length == 0 || !searchTerm) {
+      this.users = this.userService.getUsersFromLocalCache();
+    }
+  }
+
   private sendNotification(notificationType: NotificationType, message: string): void {
     if(message){
       this.notificationService.showNotification(notificationType, message);
