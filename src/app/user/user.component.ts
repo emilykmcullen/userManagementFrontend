@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import { NotificationType } from '../enum/notification-type.enum';
+import { CustomHttpResponse } from '../models/custom-http-response';
 import { User } from '../models/user';
 import { NotificationService } from '../service/notification.service';
 import { UserService } from '../service/user.service';
@@ -83,6 +84,7 @@ export class UserComponent implements OnInit {
       },
       (errorResponse: HttpErrorResponse) => {
         this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+        this.profileImage = null;
       }
     )
     );
@@ -120,6 +122,20 @@ export class UserComponent implements OnInit {
     if (results.length == 0 || !searchTerm) {
       this.users = this.userService.getUsersFromLocalCache();
     }
+  }
+
+  public onDeleteUser(userId: number): void {
+    this.subscriptions.push(
+      this.userService.deleteUser(userId).subscribe(
+        (response: CustomHttpResponse) => {
+          this.sendNotification(NotificationType.SUCCESS, response.message);
+          this.getUsers(false);
+        },
+        (errorResponse: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+        }
+      )
+    )
   }
 
   public onEditUser(editUser: User): void {
