@@ -21,7 +21,9 @@ export class UserComponent implements OnInit {
   public selectedUser: User;
   private subscriptions: Subscription[] = [];
   public fileName: string;
-  profileImage: File;
+  public profileImage: File;
+  public editUser = new User();
+  private currentUsername: string;
 
   constructor(private userService: UserService, private notificationService: NotificationService) { }
 
@@ -77,7 +79,7 @@ export class UserComponent implements OnInit {
         this.fileName = null;
         this.profileImage = null;
         userForm.reset();
-        this.sendNotification(NotificationType.SUCCESS, `${response.firstName} ${response.lastName} updated successfully`);
+        this.sendNotification(NotificationType.SUCCESS, `${response.firstName} ${response.lastName} added successfully`);
       },
       (errorResponse: HttpErrorResponse) => {
         this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
@@ -85,6 +87,24 @@ export class UserComponent implements OnInit {
     )
     );
   } 
+
+  public onUpdateUser(): void {
+    const formData = this.userService.createUserFormData(this.currentUsername, this.editUser, this.profileImage);
+    this.subscriptions.push(
+    this.userService.updateUser(formData).subscribe(
+      (response: User) => {
+        this.clickButton('closeEditUserModalButton');
+        this.getUsers(false);
+        this.fileName = null;
+        this.profileImage = null;
+        this.sendNotification(NotificationType.SUCCESS, `${response.firstName} ${response.lastName} updated successfully`);
+      },
+      (errorResponse: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+      }
+    )
+    );
+  }
 
   public searchUsers(searchTerm: string): void {
     const results: User[] = []; 
@@ -100,6 +120,12 @@ export class UserComponent implements OnInit {
     if (results.length == 0 || !searchTerm) {
       this.users = this.userService.getUsersFromLocalCache();
     }
+  }
+
+  public onEditUser(editUser: User): void {
+    this.editUser = editUser;
+    this.currentUsername = editUser.username;
+    this.clickButton('openUserEdit');
   }
 
   private sendNotification(notificationType: NotificationType, message: string): void {
