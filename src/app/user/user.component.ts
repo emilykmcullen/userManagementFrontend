@@ -124,6 +124,24 @@ export class UserComponent implements OnInit {
     }
   }
 
+  public onResetPassword(resetForm: NgForm): void {
+    const formData = this.userService.createUserPassFormData(resetForm.value["reset-password-username"], resetForm.value["reset-password-current-pass"], resetForm.value["reset-password-new-pass"]);
+    this.refreshing = true;
+    this.subscriptions.push(
+      this.userService.resetPassword(formData).subscribe(
+        (response: User) => {
+          this.sendNotification(NotificationType.SUCCESS, `${response.username} password update successfully`);
+          this.refreshing = false;
+        },
+        (errorResponse: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.WARNING, errorResponse.error.message);
+          this.refreshing = false;
+        },
+        () => resetForm.reset()
+      )
+    );
+  }
+
   public onDeleteUser(userId: number): void {
     this.subscriptions.push(
       this.userService.deleteUser(userId).subscribe(

@@ -64,4 +64,12 @@ export class UserService {
     formData.append('isNotLocked', JSON.stringify(user.notLocked));
     return formData;
   }
+
+  public createUserPassFormData(loggedInUsername: string, currentPass: string, newPass: string ): FormData {
+    const formData = new FormData();
+    formData.append('currentUsername', loggedInUsername);
+    formData.append('currentPassword', currentPass);
+    formData.append('newPassword', newPass);
+    return formData;
+  }
 }
