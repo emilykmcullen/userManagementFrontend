@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { Router } from '@angular/router';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import { NotificationType } from '../enum/notification-type.enum';
 import { CustomHttpResponse } from '../models/custom-http-response';
@@ -28,7 +29,7 @@ export class UserComponent implements OnInit {
   public editUser = new User();
   private currentUsername: string;
 
-  constructor(private authenticationService: AuthenticationService, private userService: UserService,
+  constructor(private router: Router, private authenticationService: AuthenticationService, private userService: UserService,
                private notificationService: NotificationService) { }
 
   ngOnInit(): void {
@@ -148,6 +149,12 @@ export class UserComponent implements OnInit {
       }
     )
     );
+  }
+
+  public onLogOut(): void {
+    this.authenticationService.logOut();
+    this.router.navigate(['/login']);
+    this.sendNotification(NotificationType.SUCCESS, "You've been successfully logged out");
   }
 
   public onResetPassword(resetForm: NgForm): void {
