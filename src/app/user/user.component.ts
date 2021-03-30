@@ -128,6 +128,28 @@ export class UserComponent implements OnInit {
     }
   }
 
+  public onUpdateCurrentUser(user: User): void {
+    this.refreshing = true;
+    this.currentUsername = this.authenticationService.getUserFromLocalCache().username;
+    const formData = this.userService.createUserFormData(this.currentUsername, user, this.profileImage);
+    this.subscriptions.push(
+    this.userService.updateUser(formData).subscribe(
+      (response: User) => {
+        this.authenticationService.addUserToLocalCache(response)
+        this.getUsers(false);
+        this.fileName = null;
+        this.profileImage = null;
+        this.sendNotification(NotificationType.SUCCESS, `${response.firstName} ${response.lastName} updated successfully`);
+      },
+      (errorResponse: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+        this.profileImage = null;
+        this.refreshing = false;
+      }
+    )
+    );
+  }
+
   public onResetPassword(resetForm: NgForm): void {
     const formData = this.userService.createUserPassFormData(resetForm.value["reset-password-username"], resetForm.value["reset-password-current-pass"], resetForm.value["reset-password-new-pass"]);
     this.refreshing = true;
