@@ -6,6 +6,7 @@ import {BehaviorSubject, Subscription} from 'rxjs';
 import { NotificationType } from '../enum/notification-type.enum';
 import { CustomHttpResponse } from '../models/custom-http-response';
 import { User } from '../models/user';
+import { AuthenticationService } from '../service/authentication.service';
 import { NotificationService } from '../service/notification.service';
 import { UserService } from '../service/user.service';
 
@@ -18,6 +19,7 @@ export class UserComponent implements OnInit {
   private titleSubject = new BehaviorSubject<string>('Users');
   public titleAction$ = this.titleSubject.asObservable();
   public users: User[];
+  public user: User;
   public refreshing: boolean;
   public selectedUser: User;
   private subscriptions: Subscription[] = [];
@@ -26,9 +28,11 @@ export class UserComponent implements OnInit {
   public editUser = new User();
   private currentUsername: string;
 
-  constructor(private userService: UserService, private notificationService: NotificationService) { }
+  constructor(private authenticationService: AuthenticationService, private userService: UserService,
+               private notificationService: NotificationService) { }
 
   ngOnInit(): void {
+    this.user = this.authenticationService.getUserFromLocalCache();
     this.getUsers(true);
   }
 
