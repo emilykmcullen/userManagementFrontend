@@ -1,4 +1,4 @@
-import { HttpErrorResponse, HttpEvent } from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpEventType } from '@angular/common/http';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import { NotificationType } from '../enum/notification-type.enum';
 import { CustomHttpResponse } from '../models/custom-http-response';
+import { FileUploadStatus } from '../models/file-upload.status';
 import { User } from '../models/user';
 import { AuthenticationService } from '../service/authentication.service';
 import { NotificationService } from '../service/notification.service';
@@ -28,6 +29,7 @@ export class UserComponent implements OnInit {
   public profileImage: File;
   public editUser = new User();
   private currentUsername: string;
+  public fileStatus = new FileUploadStatus();
 
   constructor(private router: Router, private authenticationService: AuthenticationService, private userService: UserService,
                private notificationService: NotificationService) { }
@@ -162,13 +164,34 @@ export class UserComponent implements OnInit {
     this.subscriptions.push(
       this.userService.updateProfileImage(formData).subscribe(
         (event: HttpEvent<any>) => {
-          this.sendNotification(NotificationType.SUCCESS, `Profile image updated successfully`);
+          this.reportUploadProgress(event);
+          
         },
         (errorResponse: HttpErrorResponse) => {
           this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
         }
       )
       );
+  }
+  private reportUploadProgress(event: HttpEvent<any>): void {
+    switch (event.type) {
+      case HttpEventType.UploadProgress: 
+        this.fileStatus.percentage = Math.round(event.loaded/event.total * 100);
+        this.fileStatus.status = 'progress';
+        break;
+      case HttpEventType.Response: 
+        if (event.status === 200){
+          this.user.profileImageUrl = `${event.body.profileImageUrl}?time=${new Date().getTime()}`;
+          this.sendNotification(NotificationType.SUCCESS, `${event.body.firstName}\'s profile image updated successfully`);
+          this.fileStatus.status = 'done';
+          break;
+        } else {
+          this.sendNotification(NotificationType.ERROR, `Unable to upload image, please try again`)
+          break;
+        }
+      default:
+        `Finished all processes`;
+    }
   }
 
   public onLogOut(): void {
