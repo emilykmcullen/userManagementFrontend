@@ -169,6 +169,7 @@ export class UserComponent implements OnInit {
         },
         (errorResponse: HttpErrorResponse) => {
           this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+          this.fileStatus.status = 'done';
         }
       )
       );
@@ -218,9 +219,9 @@ export class UserComponent implements OnInit {
     );
   }
 
-  public onDeleteUser(userId: number): void {
+  public onDeleteUser(username: string): void {
     this.subscriptions.push(
-      this.userService.deleteUser(userId).subscribe(
+      this.userService.deleteUser(username).subscribe(
         (response: CustomHttpResponse) => {
           this.sendNotification(NotificationType.SUCCESS, response.message);
           this.getUsers(false);
