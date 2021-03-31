@@ -5,6 +5,7 @@ import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import { NotificationType } from '../enum/notification-type.enum';
+import { Role } from '../enum/role.enum';
 import { CustomHttpResponse } from '../models/custom-http-response';
 import { FileUploadStatus } from '../models/file-upload.status';
 import { User } from '../models/user';
@@ -73,6 +74,28 @@ export class UserComponent implements OnInit {
     this.profileImage = profileImage;
   }
 
+  public updateProfileImage(): void {
+    this.clickButton("profile-image-input")
+  }
+
+  public onUpdateProfileImage(): void {
+    const formData = new FormData();
+    formData.append('username', this.user.username);
+    formData.append('profileImage', this.profileImage);
+    this.subscriptions.push(
+      this.userService.updateProfileImage(formData).subscribe(
+        (event: HttpEvent<any>) => {
+          this.reportUploadProgress(event);
+          
+        },
+        (errorResponse: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+          this.fileStatus.status = 'done';
+        }
+      )
+      );
+  }
+
   public saveNewUser(): void {
     this.clickButton('new-user-save');
   }
@@ -120,8 +143,8 @@ export class UserComponent implements OnInit {
     for (const user of this.userService.getUsersFromLocalCache()) {
       if (user.firstName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
           user.lastName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
-          user.username.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
-          user.userId.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+          user.username.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
+          ) {
             results.push(user)
       }
     }
@@ -153,27 +176,26 @@ export class UserComponent implements OnInit {
     );
   }
 
-  public updateProfileImage(): void {
-    this.clickButton("profile-image-input")
+  
+
+  public get isAdmin(): boolean {
+    return this.getUserRole() === Role.ADMIN || this.getUserRole() === Role.SUPER_ADMIN;
   }
 
-  public onUpdateProfileImage(): void {
-    const formData = new FormData();
-    formData.append('username', this.user.username);
-    formData.append('profileImage', this.user.username);
-    this.subscriptions.push(
-      this.userService.updateProfileImage(formData).subscribe(
-        (event: HttpEvent<any>) => {
-          this.reportUploadProgress(event);
-          
-        },
-        (errorResponse: HttpErrorResponse) => {
-          this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
-          this.fileStatus.status = 'done';
-        }
-      )
-      );
+  public get isManager(): boolean {
+    return this.isAdmin || this.getUserRole() === Role.MANAGER;
   }
+
+  public get isAdminOrManager(): boolean {
+    return this.isAdmin || this.isManager;
+  }
+
+
+
+  private getUserRole(): string {
+    return this.authenticationService.getUserFromLocalCache().role;
+  }
+
   private reportUploadProgress(event: HttpEvent<any>): void {
     switch (event.type) {
       case HttpEventType.UploadProgress: 

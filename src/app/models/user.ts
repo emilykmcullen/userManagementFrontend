@@ -1,7 +1,9 @@
 export class User {
+    public userId: string;
     public firstName: string;
     public lastName: string;
     public username: string;
+    public password: string;
     public email: string;
     public lastLoginDate: Date;
     public lastLoginDateDisplay: Date;
@@ -13,6 +15,7 @@ export class User {
     public authorities: [];
   
     constructor() {
+      this.userId = '';
       this.firstName = '';
       this.lastName = '';
       this.username = '';
